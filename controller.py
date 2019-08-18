@@ -283,21 +283,6 @@ class Controller(object):
 
         return output_string
 
-    def output_state(self, ev_type, abbv):
-        """Print out the output state."""
-        if ev_type == 'Key':
-            if self.btn_state[abbv] != self.old_btn_state[abbv]:
-                print(self.format_state())
-                return
-
-        if abbv[0] == 'H':
-            print(self.format_state())
-            return
-
-        difference = self.abs_state[abbv] - self.old_abs_state[abbv]
-        if (abs(difference)) > MIN_ABS_DIFFERENCE:
-            print(self.format_state())
-
     def handle_mouse(self):
         mouse_move_abs = [0, 0]
         mouse_move_rel = [0, 0]
