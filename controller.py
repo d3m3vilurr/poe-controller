@@ -4,6 +4,7 @@ from __future__ import print_function
 import uinput
 import inputs
 from mouse import DefaultMouse
+from keyboard import KeyCode, DefaultKeyboard
 import math
 import enum
 
@@ -29,97 +30,6 @@ def angle(x, y):
 def move_distance(angle, distance=DISTANCE):
     return int(distance * math.cos(angle)), int(distance * math.sin(angle))
 
-class KeyCode(enum.Enum):
-    KEY_1 = 1
-    KEY_2 = 2
-    KEY_3 = 3
-    KEY_4 = 4
-    KEY_5 = 5
-    KEY_6 = 6
-    KEY_7 = 7
-    KEY_Q = 10
-    KEY_W = 11
-    KEY_E = 12
-    KEY_R = 13
-    KEY_T = 14
-    KEY_X = 15
-    KEY_ALT = 30
-    KEY_CTRL = 31
-    KEY_ESC = 32
-
-class Keyboard(object):
-    def input(self, keys):
-        pass
-
-    def press(self, key, release=False):
-        pass
-
-class UinputKeyboard(Keyboard):
-    def __init__(self):
-        self.device = uinput.Device([
-            uinput.KEY_1,
-            uinput.KEY_2,
-            uinput.KEY_3,
-            uinput.KEY_4,
-            uinput.KEY_5,
-            uinput.KEY_6,
-            uinput.KEY_7,
-            uinput.KEY_Q,
-            uinput.KEY_W,
-            uinput.KEY_E,
-            uinput.KEY_R,
-            uinput.KEY_T,
-            uinput.KEY_X,
-            uinput.KEY_LEFTALT,
-            uinput.KEY_LEFTCTRL,
-            uinput.KEY_ESC,
-        ])
-
-    def input(self, keys):
-        if not len(keys):
-            return
-        combos = []
-        for key in keys:
-            if key == KeyCode.KEY_1:
-                combos.append(uinput.KEY_1)
-            if key == KeyCode.KEY_2:
-                combos.append(uinput.KEY_2)
-            if key == KeyCode.KEY_3:
-                combos.append(uinput.KEY_3)
-            if key == KeyCode.KEY_4:
-                combos.append(uinput.KEY_4)
-            if key == KeyCode.KEY_5:
-                combos.append(uinput.KEY_5)
-            if key == KeyCode.KEY_6:
-                combos.append(uinput.KEY_6)
-            if key == KeyCode.KEY_7:
-                combos.append(uinput.KEY_7)
-            if key == KeyCode.KEY_Q:
-                combos.append(uinput.KEY_Q)
-            if key == KeyCode.KEY_W:
-                combos.append(uinput.KEY_W)
-            if key == KeyCode.KEY_E:
-                combos.append(uinput.KEY_E)
-            if key == KeyCode.KEY_R:
-                combos.append(uinput.KEY_R)
-            if key == KeyCode.KEY_T:
-                combos.append(uinput.KEY_T)
-            if key == KeyCode.KEY_X:
-                combos.append(uinput.KEY_X)
-            if key == KeyCode.KEY_ALT:
-                combos.append(uinput.KEY_LEFTALT)
-            if key == KeyCode.KEY_CTRL:
-                combos.append(uinput.KEY_LEFTCTRL)
-            if key == KeyCode.KEY_ESC:
-                combos.append(uinput.KEY_ESC)
-        self.device.emit_combo(combos)
-
-    def press(self, key, release=False):
-        if key == KeyCode.KEY_ALT:
-            inp = uinput.KEY_LEFTALT
-        else:
-            return
-        self.device.emit(inp, 0 if release else 1)
 
 EVENT_ABB = (
     # D-PAD, aka HAT
@@ -195,7 +105,7 @@ class Controller(object):
         if not mouse:
             mouse = DefaultMouse()
         if not keyboard:
-            keyboard = Keyboard()
+            keyboard = DefaultKeyboard()
         self.mouse = mouse
         self.keyboard = keyboard
         self.mouse_mode = 0
@@ -401,7 +311,7 @@ class Controller(object):
 
 def main():
     """Process all events forever."""
-    controller = Controller(keyboard=UinputKeyboard())
+    controller = Controller()
     while 1:
         controller.process_events()
 
