@@ -12,6 +12,10 @@ SCREEN_Y = 1080
 # don't know reason wayland use half
 SCREEN_X = 1920 / 2
 SCREEN_Y = 1080 / 2
+
+CENTER_X = int(SCREEN_X / 2)
+CENTER_Y = int(SCREEN_Y / 2)
+
 DISTANCE = 50
 
 MOVE_THRESHOLD = 20
@@ -193,6 +197,12 @@ EVENT_ABB = (
     ('Key-BTN_MODE', 'M'),
     ('Key-BTN_START', 'ST'),
 
+    # D-PAD remap
+    ('Key-BTN_DL', 'DL'),
+    ('Key-BTN_DR', 'DR'),
+    ('Key-BTN_DU', 'DU'),
+    ('Key-BTN_DD', 'DD'),
+
     # PiHUT SNES style controller buttons
     ('Key-BTN_TRIGGER', 'N'),
     ('Key-BTN_THUMB', 'E'),
@@ -262,28 +272,6 @@ class Controller(object):
 
         return self.abbrevs[key]
 
-    def process_event(self, event):
-        """Process the event into a state."""
-        if event.ev_type == 'Sync':
-            return
-        if event.ev_type == 'Misc':
-            return
-        key = event.ev_type + '-' + event.code
-        try:
-            abbv = self.abbrevs[key]
-        except KeyError:
-            abbv = self.handle_unknown_event(event, key)
-            if not abbv:
-                return
-        if event.ev_type == 'Key':
-            self.old_btn_state[abbv] = self.btn_state[abbv]
-            self.btn_state[abbv] = event.state
-        if event.ev_type == 'Absolute':
-            self.old_abs_state[abbv] = self.abs_state[abbv]
-            self.abs_state[abbv] = event.state
-        #self.output_state(event.ev_type, abbv)
-        self.handle_inputs(event.ev_type, abbv)
-
     def format_state(self):
         """Format the state."""
         output_string = ""
@@ -326,9 +314,16 @@ class Controller(object):
                 mouse_move_rel[1] = v - 128
 
         if abs(mouse_move_rel[0]) > MOVE_THRESHOLD or abs(mouse_move_rel[1]) > MOVE_THRESHOLD:
+            if self.mouse_mode != 0:
+                # forceful release all buttons
+                self.mouse.left(on=False)
+                self.mouse.right(on=False)
+                self.mouse.middle(on=False)
             self.mouse_mode = 1
         elif abs(mouse_move_abs[0]) > MOVE_THRESHOLD or abs(mouse_move_abs[1]) > MOVE_THRESHOLD:
-            self.mouse_mode = 0
+            if self.mouse_mode != 0:
+                self.mouse_mode = 0
+            # forceful activate left mouse
             self.mouse.left()
 
         if self.mouse_mode == 1:
@@ -336,96 +331,79 @@ class Controller(object):
             distance = int(distance * 10 / 128)
 
             point_diff = move_distance(angle(mouse_move_rel[0], mouse_move_rel[1]), distance=distance)
-            self.mouse and self.mouse.move(point_diff[0], point_diff[1], relative=True)
-            self.mouse.left(on=self.btn_state.get('TL2') and True or False)
+            self.mouse.move(point_diff[0], point_diff[1], relative=True)
+            self.mouse.left(on=self.pressed('TL2'))
         else:
             distance = (mouse_move_abs[0] ** 2 + mouse_move_abs[1] ** 2) ** 0.5
             distance = int(distance * DISTANCE / 128)
 
             point_diff = move_distance(angle(mouse_move_abs[0], mouse_move_abs[1]), distance=distance)
-            self.mouse and self.mouse.move(SCREEN_X / 2 + point_diff[0], SCREEN_Y / 2 + point_diff[1])
+            self.mouse.move(CENTER_X + point_diff[0], CENTER_Y + point_diff[1])
 
             if abs(mouse_move_abs[0]) < MOVE_THRESHOLD and abs(mouse_move_abs[1]) < MOVE_THRESHOLD:
                 self.mouse.left(on=False)
 
-            self.mouse.right(on=self.btn_state.get('TR') and True or False)
-            self.mouse.middle(on=self.btn_state.get('TL') and True or False)
+            self.mouse.right(on=self.pressed('TR'))
+            self.mouse.middle(on=self.pressed('TL'))
 
+    def pressed(self, abbv):
+        return self.btn_state.get(abbv, 0) != 0
 
-    def handle_inputs(self, ev_type, abbv):
-        difference = 0
+    def holded(self, abbv):
+        return self.btn_state.get(abbv, 0) == self.old_btn_state.get(abbv, 0)
 
-        # BTN
-        if ev_type == 'Key':
-            if self.btn_state[abbv] == self.old_btn_state[abbv]:
-                pass
-        elif abbv[0] == 'H':
-            if self.abs_state[abbv] == self.old_abs_state[abbv]:
-                pass
-        else:
-            difference = self.abs_state[abbv] - self.old_abs_state[abbv]
-            if (abs(difference)) > MIN_ABS_DIFFERENCE:
-                print(self.format_state())
-
-        self.handle_mouse()
-
-        # buttons
+    def handle_inputs(self):
         keys = []
-        if abbv in ('HX', 'HY') and \
-                self.abs_state[abbv] != self.old_abs_state[abbv]:
-            if not self.btn_state.get('TR3'):
-                if abbv == 'HX':
-                    if self.abs_state[abbv] == -1:
-                        keys.append(KeyCode.KEY_1)
-                    if self.abs_state[abbv] == 1:
-                        keys.append(KeyCode.KEY_3)
-                if abbv == 'HY':
-                    if self.abs_state[abbv] == -1:
-                        keys.append(KeyCode.KEY_2)
-                    if self.abs_state[abbv] == 1:
-                        keys.append(KeyCode.KEY_4)
-            else:
-                if abbv == 'HX':
-                    if self.abs_state[abbv] == -1:
-                        keys.append(KeyCode.KEY_5)
-                    if self.abs_state[abbv] == 1:
-                        keys.append(KeyCode.KEY_7)
-                if abbv == 'HY':
-                    if self.abs_state[abbv] == -1:
-                        keys.append(KeyCode.KEY_6)
-                    #if self.abs_state[abbv] == 1:
-                    #    keys.append(KeyCode.KEY_8)
-
-        #if abbv in ('N', 'E', 'S', 'W') and \
-        #        self.btn_state[abbv] != self.old_btn_state[abbv]:
-        # these skill button can be hold
-        if not self.btn_state.get('TR3'):
-            if self.btn_state.get('W') == 1:
+        if not self.pressed('TR3'):
+            # DPAD should check button holding
+            if self.pressed('DL') and not self.holded('DL'):
+                keys.append(KeyCode.KEY_1)
+            if self.pressed('DU') and not self.holded('DU'):
+                keys.append(KeyCode.KEY_2)
+            if self.pressed('DR') and not self.holded('DR'):
+                keys.append(KeyCode.KEY_3)
+            if self.pressed('DD') and not self.holded('DD'):
+                keys.append(KeyCode.KEY_4)
+            # Normal button can support firing when holding the button
+            if self.pressed('W'):
                 keys.append(KeyCode.KEY_Q)
-            if self.btn_state.get('N') == 1:
+            if self.pressed('N'):
                 keys.append(KeyCode.KEY_W)
-            if self.btn_state.get('E') == 1:
+            if self.pressed('E'):
                 keys.append(KeyCode.KEY_E)
         else:
-            if self.btn_state.get('W') == 1:
+            # DPAD should check button holding
+            if self.pressed('DL') and not self.holded('DL'):
+                keys.append(KeyCode.KEY_5)
+            if self.pressed('DU') and not self.holded('DU'):
+                keys.append(KeyCode.KEY_6)
+            if self.pressed('DR') and not self.holded('DR'):
+                keys.append(KeyCode.KEY_7)
+            #if self.pressed('DD') and not self.holded('DD'):
+            #    keys.append(KeyCode.KEY_8)
+            # Normal button can support firing when holding the button
+
+            # XXX: alt should call press/release manually
+            if self.pressed('W'):
                 self.keyboard.press(KeyCode.KEY_ALT)
-            elif self.btn_state.get('W') == 0:
+            else:
                 self.keyboard.press(KeyCode.KEY_ALT, release=True)
-            if self.btn_state.get('N') == 1:
+            if self.pressed('N'):
                 keys.append(KeyCode.KEY_R)
-            if self.btn_state.get('E') == 1:
+            if self.pressed('E'):
                 keys.append(KeyCode.KEY_T)
 
-        # but ESC could check double input
-        if abbv == 'S' and self.btn_state[abbv] == 1 and \
-                self.btn_state[abbv] != self.old_btn_state[abbv]:
+        # when press escape key, controller must release button before call it
+        if self.pressed('S') and not self.holded('S'):
             keys.append(KeyCode.KEY_ESC)
 
-        # but ESC could check double input
-        if abbv == 'THR' and self.btn_state[abbv] == 1 and \
-                self.btn_state[abbv] != self.old_btn_state[abbv]:
+        if self.pressed('THR') and not self.holded('THR'):
             keys.append(KeyCode.KEY_X)
 
+        difference = 0
+
+        self.handle_mouse()
+        #print(keys)
         self.keyboard.input(keys)
 
     def process_events(self):
@@ -434,8 +412,53 @@ class Controller(object):
             events = self.gamepad.read()
         except EOFError:
             events = []
+
+        if len(events) == 1 and events[0].ev_type in ('Sync', 'Misc'):
+            return
+
+        btn_state = {}
+        abs_state = {}
+
+        for key, value in self.abbrevs.items():
+            if key.startswith('Absolute'):
+                self.old_abs_state[value] = abs_state[value] = self.abs_state.get(value, 128)
+            if key.startswith('Key'):
+                self.old_btn_state[value] = btn_state[value] = self.btn_state.get(value, 0)
+
         for event in events:
-            self.process_event(event)
+            if event.ev_type == 'Misc':
+                continue
+            key = event.ev_type + '-' + event.code
+            try:
+                abbv = self.abbrevs[key]
+            except KeyError:
+                abbv = self.handle_unknown_event(event, key)
+                if not abbv:
+                    continue
+            if event.ev_type == 'Key':
+                btn_state[abbv] = event.state
+            if event.ev_type == 'Absolute':
+                abs_state[abbv] = event.state
+
+                if abbv == 'HX':
+                    btn_state['DL'] = btn_state['DR'] = 0
+                    if event.state < 0:
+                        btn_state['DL'] = 1
+                    elif event.state > 0:
+                        btn_state['DR'] = 1
+                if abbv == 'HY':
+                    btn_state['DU'] = btn_state['DD'] = 0
+                    if event.state < 0:
+                        btn_state['DU'] = 1
+                    elif event.state > 0:
+                        btn_state['DD'] = 1
+
+        self.btn_state = btn_state
+        self.abs_state = abs_state
+
+        #print(self.format_state())
+        self.handle_inputs()
+
 
 
 def main():
