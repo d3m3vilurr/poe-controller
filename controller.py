@@ -1,8 +1,9 @@
 """Simple gamepad/joystick test example."""
 
 from __future__ import print_function
-import inputs
 import uinput
+import inputs
+from mouse import DefaultMouse
 import math
 import enum
 
@@ -28,19 +29,6 @@ def angle(x, y):
 def move_distance(angle, distance=DISTANCE):
     return int(distance * math.cos(angle)), int(distance * math.sin(angle))
 
-class Mouse(object):
-    def move(self, x, y, relative=False):
-        pass
-
-    def left(self):
-        pass
-
-    def middle(self):
-        pass
-
-    def right(self):
-        pass
-
 class KeyCode(enum.Enum):
     KEY_1 = 1
     KEY_2 = 2
@@ -65,41 +53,6 @@ class Keyboard(object):
 
     def press(self, key, release=False):
         pass
-
-class UinputMouse(Mouse):
-
-    def __init__(self):
-        self.device = uinput.Device([
-            uinput.BTN_LEFT,
-            uinput.BTN_RIGHT,
-            uinput.BTN_MIDDLE,
-            uinput.REL_X,
-            uinput.REL_Y,
-        ])
-        self._BTN = {}
-
-    def move(self, x, y, relative=False):
-        if not relative:
-            # move 0, 0
-            self.device.emit(uinput.REL_X, -65536)
-            self.device.emit(uinput.REL_Y, -65536)
-        self.device.emit(uinput.REL_X, int(x))
-        self.device.emit(uinput.REL_Y, int(y))
-
-    def left(self, on=True):
-        self._click(uinput.BTN_LEFT, on)
-
-    def middle(self, on=True):
-        self._click(uinput.BTN_MIDDLE, on)
-
-    def right(self, on=True):
-        self._click(uinput.BTN_RIGHT, on)
-
-    def _click(self, btn, on=True):
-        if self._BTN.get(btn, False) == on:
-            return
-        self.device.emit(btn, on and 1 or 0)
-        self._BTN[btn] = on
 
 class UinputKeyboard(Keyboard):
     def __init__(self):
@@ -240,7 +193,7 @@ class Controller(object):
         if not gamepad:
             self._get_gamepad()
         if not mouse:
-            mouse = Mouse()
+            mouse = DefaultMouse()
         if not keyboard:
             keyboard = Keyboard()
         self.mouse = mouse
@@ -448,7 +401,7 @@ class Controller(object):
 
 def main():
     """Process all events forever."""
-    controller = Controller(mouse=UinputMouse(), keyboard=UinputKeyboard())
+    controller = Controller(keyboard=UinputKeyboard())
     while 1:
         controller.process_events()
 
