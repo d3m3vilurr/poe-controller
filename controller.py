@@ -59,6 +59,7 @@ EVENT_ABB = (
     ('Key-BTN_TR2', 'TR3'),
     ('Key-BTN_MODE', 'M'),
     ('Key-BTN_START', 'ST'),
+    ('Key-BTN_SELECT', 'SL'),
 
     # D-PAD remap
     ('Key-BTN_DL', 'DL'),
@@ -242,7 +243,7 @@ class Controller(object):
                 keys.append(KeyCode.KEY_T)
 
         # when press escape key, controller must release button before call it
-        if self.pressed('S') and not self.holded('S'):
+        if self.pressed('ST') and not self.holded('ST'):
             keys.append(KeyCode.KEY_ESC)
 
         if self.pressed('THR') and not self.holded('THR'):
