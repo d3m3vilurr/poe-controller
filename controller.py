@@ -190,7 +190,7 @@ class Controller(object):
 
             point_diff = move_distance(angle(mouse_move_rel[0], mouse_move_rel[1]), distance=distance)
             self.mouse.move(point_diff[0], point_diff[1], relative=True)
-            self.mouse.left(on=self.pressed('TL2'))
+            self.mouse.left(on=self.pressed('S'))
         else:
             distance = (mouse_move_abs[0] ** 2 + mouse_move_abs[1] ** 2) ** 0.5
             # left / right should move to twice than up / down
@@ -250,13 +250,15 @@ class Controller(object):
 
             # XXX: alt should call press/release manually
             if self.pressed('W'):
-                self.keyboard.press(KeyCode.KEY_ALT)
-            else:
-                self.keyboard.press(KeyCode.KEY_ALT, release=True)
+                pass
             if self.pressed('N'):
                 keys.append(KeyCode.KEY_R)
             if self.pressed('E'):
                 keys.append(KeyCode.KEY_T)
+            if self.pressed('TL2'):
+                self.keyboard.press(KeyCode.KEY_ALT)
+            else:
+                self.keyboard.press(KeyCode.KEY_ALT, release=True)
 
         # when press escape key, controller must release button before call it
         if self.pressed('ST') and not self.holded('ST'):
