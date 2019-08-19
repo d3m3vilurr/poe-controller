@@ -62,7 +62,7 @@ EVENT_ABB = (
     ('Key-BTN_TL', 'TL'),
     ('Key-BTN_TR', 'TR'),
     ('Key-BTN_TL2', 'TL2'),
-    ('Key-BTN_TR2', 'TR3'),
+    ('Key-BTN_TR2', 'TR2'),
     ('Key-BTN_MODE', 'M'),
     ('Key-BTN_START', 'ST'),
     ('Key-BTN_SELECT', 'SL'),
@@ -209,7 +209,7 @@ class Controller(object):
 
     def handle_inputs(self):
         keys = []
-        if not self.pressed('TR3'):
+        if not self.pressed('TR2'):
             # DPAD should check button holding
             if self.pressed('DL') and not self.holded('DL'):
                 keys.append(KeyCode.KEY_1)
