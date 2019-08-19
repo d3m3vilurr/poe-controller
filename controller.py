@@ -3,6 +3,7 @@ import sys
 import inputs
 from mouse import DefaultMouse
 from keyboard import KeyCode, DefaultKeyboard
+from window import DefaultWindow
 import math
 import enum
 import time
@@ -91,7 +92,7 @@ MIN_ABS_DIFFERENCE = 5
 
 class Controller(object):
     """Simple joystick test class."""
-    def __init__(self, gamepad=None, keyboard=None, mouse=None, abbrevs=EVENT_ABB):
+    def __init__(self, gamepad=None, window=None, keyboard=None, mouse=None, abbrevs=EVENT_ABB):
         self.btn_state = {}
         self.old_btn_state = {}
         self.abs_state = {}
@@ -108,10 +109,13 @@ class Controller(object):
         self.gamepad = gamepad
         if not gamepad:
             self._get_gamepad()
+        if not window:
+            window = DefaultWindow()
         if not mouse:
             mouse = DefaultMouse()
         if not keyboard:
             keyboard = DefaultKeyboard()
+        self.window = window
         self.mouse = mouse
         self.keyboard = keyboard
         self.mouse_mode = 0
@@ -317,7 +321,9 @@ class Controller(object):
         self.abs_state = abs_state
 
         #print(self.format_state())
-        self.handle_inputs()
+
+        if self.window.is_active():
+            self.handle_inputs()
 
 
 
