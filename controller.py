@@ -193,10 +193,17 @@ class Controller(object):
             self.mouse.left(on=self.pressed('TL2'))
         else:
             distance = (mouse_move_abs[0] ** 2 + mouse_move_abs[1] ** 2) ** 0.5
-            distance = int(distance * DISTANCE / 128)
+            # left / right should move to twice than up / down
+            distance = int(distance * self.window.get_radius() / 128)
 
             point_diff = move_distance(angle(mouse_move_abs[0], mouse_move_abs[1]), distance=distance)
-            self.mouse.move(CENTER_X + point_diff[0], CENTER_Y + point_diff[1])
+
+            win_size = self.window.get_window_size()
+            win_offset = self.window.get_window_offset()
+
+            cursor_x = int((win_size[0] / 2) + point_diff[0] + win_offset[0])
+            cursor_y = int((win_size[1] / 2) + point_diff[1] + win_offset[1])
+            self.mouse.move(cursor_x, cursor_y)
 
             if abs(mouse_move_abs[0]) < MOVE_THRESHOLD and abs(mouse_move_abs[1]) < MOVE_THRESHOLD:
                 self.mouse.left(on=False)

@@ -2,13 +2,30 @@ import win32gui
 from window.base import BaseWindow
 
 class Win32Window(BaseWindow):
+    def __init__(self):
+        self._curr_win_rect = (0, 0, 0, 0)
+
     def get_window_size(self):
-        return (1920, 1080)
+        if not self.is_active():
+            return (0, 0)
+        return self._curr_win_rect[-2:]
 
     def get_window_offset(self):
-        return (0, 0)
+        if not self.is_active():
+            return (0, 0)
+        offset = self._curr_win_rect[:2]
+        _, height = self.get_window_size()
+        return (offset[0], offset[1] - int(height / 20))
+
+    def get_radius(self):
+        if not self.is_active():
+            return 0
+        offset = self._curr_win_rect[:2]
+        _, height = self.get_window_size()
+        return int(height / 5)
 
     def is_active(self):
         window = win32gui.GetForegroundWindow()
-        return win32gui.GetWindowText(window) == 'Path of Exile'
-
+        self._curr_win = window
+        self._curr_win_rect = win32gui.GetWindowRect(self._curr_win)
+        return win32gui.GetWindowText(self._curr_win) == 'Path of Exile'
