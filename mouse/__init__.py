@@ -1,6 +1,9 @@
 import os
+import sys
 
-if os.environ.get('WAYLAND_DISPLAY'):
+if sys.platform == 'win32':
+    from mouse.win32 import Win32Mouse as DefaultMouse
+elif os.environ.get('WAYLAND_DISPLAY'):
     from mouse.uinput import UinputMouse as DefaultMouse
 else:
     from mouse.base import BaseMouse as DefaultMouse
