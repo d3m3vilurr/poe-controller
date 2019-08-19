@@ -23,10 +23,10 @@ MOVE_THRESHOLD = 20
 KEY_INPUT_DELAY = 10
 
 if sys.platform == 'win32':
-    ABS_DIV = 256
+    ABS_DIV = (256, -256)
     ABS_OFF = 0
 else:
-    ABS_DIV = 1
+    ABS_DIV = (1, 1)
     ABS_OFF = -128
 
 def angle(x, y):
@@ -307,8 +307,10 @@ class Controller(object):
                         btn_state['DU'] = 1
                     elif event.state > 0:
                         btn_state['DD'] = 1
-                if abbv in ('LX', 'LY', 'RX', 'RY'):
-                    abs_state[abbv] = int(abs_state[abbv] / ABS_DIV) + ABS_OFF
+                if abbv in ('LX', 'RX'):
+                    abs_state[abbv] = int(abs_state[abbv] / ABS_DIV[0]) + ABS_OFF
+                if abbv in ('LY', 'RY'):
+                    abs_state[abbv] = int(abs_state[abbv] / ABS_DIV[1]) + ABS_OFF
 
         btn_state['TL2'] = abs_state['LZ'] == 255 and 1 or 0
         btn_state['TR2'] = abs_state['RZ'] == 255 and 1 or 0
