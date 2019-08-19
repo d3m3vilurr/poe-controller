@@ -113,7 +113,6 @@ class Controller(object):
         """Get a gamepad object."""
         try:
             devices = inputs.DeviceManager()
-            devices.codes = inputs.devices.codes
             self.gamepad = devices.gamepads[0]
         except IndexError:
             raise inputs.UnpluggedError('No gamepad found.')
