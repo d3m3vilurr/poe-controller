@@ -1,8 +1,27 @@
 import win32api
 import win32con
 import time
+import threading
 from keyboard.keycode import KeyCode
 from keyboard.base import BaseKeyboard
+
+_sended = dict()
+_timeout = 0.5
+
+def send_key(vks):
+    fired = []
+    now = time.time()
+    for vk in vks:
+        if now - _sended.get(vk, 0) < _timeout:
+            continue
+        win32api.keybd_event(vk, 0, 0, 0)
+        fired.append(vk)
+        _sended[vk] = now
+
+    time.sleep(0.01)
+    for vk in fired:
+        win32api.keybd_event(vk, 0, win32con.KEYEVENTF_KEYUP, 0)
+
 
 class Win32Keyboard(BaseKeyboard):
     def input(self, keys):
@@ -42,8 +61,8 @@ class Win32Keyboard(BaseKeyboard):
                 combos.append(win32con.VK_CONTROL)
             if key == KeyCode.KEY_ESC:
                 combos.append(win32con.VK_ESCAPE)
-        for k in combos:
-            win32api.keybd_event(k, 0, 0, 0)
+        thread = threading.Thread(target=send_key, args=(combos,))
+        thread.start()
 
 
     def press(self, key, release=False):
@@ -52,4 +71,3 @@ class Win32Keyboard(BaseKeyboard):
         else:
             return
         win32api.keybd_event(inp, 0, win32con.KEYEVENTF_KEYUP if release else 0, 0)
-

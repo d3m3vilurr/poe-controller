@@ -22,7 +22,6 @@ class Win32Mouse(BaseMouse):
             win32api.SetCursorPos((_x + x, _y + y))
 
     def left(self, on=True):
-        print(on)
         if on:
             self._press(Win32MouseButton.LEFT)
         else:

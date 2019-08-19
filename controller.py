@@ -5,6 +5,7 @@ from mouse import DefaultMouse
 from keyboard import KeyCode, DefaultKeyboard
 import math
 import enum
+import time
 
 # TODO get right size from application
 SCREEN_X = 1920
@@ -19,8 +20,6 @@ CENTER_Y = int(SCREEN_Y / 2)
 DISTANCE = 50
 
 MOVE_THRESHOLD = 20
-
-KEY_INPUT_DELAY = 10
 
 if sys.platform == 'win32':
     ABS_DIV = (256, -256)
@@ -311,7 +310,6 @@ class Controller(object):
                     abs_state[abbv] = int(abs_state[abbv] / ABS_DIV[0]) + ABS_OFF
                 if abbv in ('LY', 'RY'):
                     abs_state[abbv] = int(abs_state[abbv] / ABS_DIV[1]) + ABS_OFF
-
         btn_state['TL2'] = abs_state['LZ'] == 255 and 1 or 0
         btn_state['TR2'] = abs_state['RZ'] == 255 and 1 or 0
 
