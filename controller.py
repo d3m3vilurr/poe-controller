@@ -310,6 +310,9 @@ class Controller(object):
                 if abbv in ('LX', 'LY', 'RX', 'RY'):
                     abs_state[abbv] = int(abs_state[abbv] / ABS_DIV) + ABS_OFF
 
+        btn_state['TL2'] = abs_state['LZ'] == 255 and 1 or 0
+        btn_state['TR2'] = abs_state['RZ'] == 255 and 1 or 0
+
         self.btn_state = btn_state
         self.abs_state = abs_state
 
