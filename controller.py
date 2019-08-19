@@ -8,18 +8,7 @@ import enum
 import time
 import traceback
 
-# TODO get right size from application
-SCREEN_X = 1920
-SCREEN_Y = 1080
-# don't know reason wayland use half
-SCREEN_X = 1920 / 2
-SCREEN_Y = 1080 / 2
-
-CENTER_X = int(SCREEN_X / 2)
-CENTER_Y = int(SCREEN_Y / 2)
-
 DISTANCE = 50
-
 MOVE_THRESHOLD = 20
 
 if sys.platform == 'win32':
