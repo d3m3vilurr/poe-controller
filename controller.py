@@ -1,4 +1,5 @@
 from __future__ import print_function
+import sys
 import inputs
 from mouse import DefaultMouse
 from keyboard import KeyCode, DefaultKeyboard
@@ -21,6 +22,13 @@ MOVE_THRESHOLD = 20
 
 KEY_INPUT_DELAY = 10
 
+if sys.platform == 'win32':
+    ABS_DIV = 256
+    ABS_OFF = 0
+else:
+    ABS_DIV = 1
+    ABS_OFF = -128
+
 def angle(x, y):
     return math.atan2(y, x)
 
@@ -36,6 +44,7 @@ EVENT_ABB = (
     # Analogs
     ('Absolute-ABS_X', 'LX'),
     ('Absolute-ABS_Y', 'LY'),
+    ('Absolute-ABS_Z', 'LZ'),
     ('Absolute-ABS_RX', 'RX'),
     ('Absolute-ABS_RY', 'RY'),
     ('Absolute-ABS_LZ', 'LZ'),
@@ -91,8 +100,8 @@ class Controller(object):
         self.abbrevs = dict(abbrevs)
         for key, value in self.abbrevs.items():
             if key.startswith('Absolute'):
-                self.abs_state[value] = 128
-                self.old_abs_state[value] = 128
+                self.abs_state[value] = 0
+                self.old_abs_state[value] = 0
             if key.startswith('Key'):
                 self.btn_state[value] = 0
                 self.old_btn_state[value] = 0
@@ -151,13 +160,13 @@ class Controller(object):
         # char mouse moves
         for k, v in self.abs_state.items():
             if k == 'LX':
-                mouse_move_abs[0] = v - 128
+                mouse_move_abs[0] = v
             if k == 'LY':
-                mouse_move_abs[1] = v - 128
+                mouse_move_abs[1] = v
             if k == 'RX':
-                mouse_move_rel[0] = v - 128
+                mouse_move_rel[0] = v
             if k == 'RY':
-                mouse_move_rel[1] = v - 128
+                mouse_move_rel[1] = v
 
         if abs(mouse_move_rel[0]) > MOVE_THRESHOLD or abs(mouse_move_rel[1]) > MOVE_THRESHOLD:
             if self.mouse_mode != 0:
@@ -267,7 +276,7 @@ class Controller(object):
 
         for key, value in self.abbrevs.items():
             if key.startswith('Absolute'):
-                self.old_abs_state[value] = abs_state[value] = self.abs_state.get(value, 128)
+                self.old_abs_state[value] = abs_state[value] = self.abs_state.get(value, 0)
             if key.startswith('Key'):
                 self.old_btn_state[value] = btn_state[value] = self.btn_state.get(value, 0)
 
@@ -298,6 +307,8 @@ class Controller(object):
                         btn_state['DU'] = 1
                     elif event.state > 0:
                         btn_state['DD'] = 1
+                if abbv in ('LX', 'LY', 'RX', 'RY'):
+                    abs_state[abbv] = int(abs_state[abbv] / ABS_DIV) + ABS_OFF
 
         self.btn_state = btn_state
         self.abs_state = abs_state
