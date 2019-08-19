@@ -25,7 +25,9 @@ class Win32Window(BaseWindow):
         return int(height / 5)
 
     def is_active(self):
-        window = win32gui.GetForegroundWindow()
-        self._curr_win = window
-        self._curr_win_rect = win32gui.GetWindowRect(self._curr_win)
-        return win32gui.GetWindowText(self._curr_win) == 'Path of Exile'
+        try:
+            self._curr_win = win32gui.GetForegroundWindow()
+            self._curr_win_rect = win32gui.GetWindowRect(self._curr_win)
+            return win32gui.GetWindowText(self._curr_win) == 'Path of Exile'
+        except:
+            return False

@@ -1,4 +1,3 @@
-from __future__ import print_function
 import sys
 import inputs
 from mouse import DefaultMouse
@@ -7,6 +6,7 @@ from window import DefaultWindow
 import math
 import enum
 import time
+import traceback
 
 # TODO get right size from application
 SCREEN_X = 1920
@@ -123,9 +123,11 @@ class Controller(object):
     def _get_gamepad(self):
         """Get a gamepad object."""
         try:
-            self.gamepad = inputs.devices.gamepads[0]
+            devices = inputs.DeviceManager()
+            devices.codes = inputs.devices.codes
+            self.gamepad = devices.gamepads[0]
         except IndexError:
-            raise inputs.UnpluggedError("No gamepad found.")
+            raise inputs.UnpluggedError('No gamepad found.')
 
     def handle_unknown_event(self, event, key):
         """Deal with unknown events."""
@@ -335,12 +337,20 @@ class Controller(object):
             self.handle_inputs()
 
 
-
 def main():
     """Process all events forever."""
-    controller = Controller()
     while 1:
-        controller.process_events()
+        try:
+            controller = Controller()
+            while 1:
+                controller.process_events()
+        except inputs.UnpluggedError:
+            pass
+        except KeyboardInterrupt:
+            sys.exit(0)
+        except:
+            traceback.print_exc()
+        time.sleep(0.1)
 
 
 if __name__ == "__main__":
