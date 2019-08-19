@@ -1,7 +1,4 @@
-"""Simple gamepad/joystick test example."""
-
 from __future__ import print_function
-import uinput
 import inputs
 from mouse import DefaultMouse
 from keyboard import KeyCode, DefaultKeyboard

@@ -2,12 +2,12 @@ class BaseMouse(object):
     def move(self, x, y, relative=False):
         pass
 
-    def left(self):
+    def left(self, on=True):
         pass
 
-    def middle(self):
+    def middle(self, on=True):
         pass
 
-    def right(self):
+    def right(self, on=True):
         pass
 
