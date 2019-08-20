@@ -20,7 +20,6 @@ class Win32Window(BaseWindow):
     def get_radius(self):
         if not self.is_active():
             return 0
-        offset = self._curr_win_rect[:2]
         _, height = self.get_window_size()
         return int(height / 5)
 
