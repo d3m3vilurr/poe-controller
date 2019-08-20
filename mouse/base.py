@@ -10,4 +10,3 @@ class BaseMouse(object):
 
     def right(self, on=True):
         pass
-

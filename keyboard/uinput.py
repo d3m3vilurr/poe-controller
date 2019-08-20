@@ -29,38 +29,38 @@ class UinputKeyboard(BaseKeyboard):
         combos = []
         for key in keys:
             if key == KeyCode.KEY_1:
-                combos.append(uinput.KEY_1)
+                self.device.emit_click(uinput.KEY_1, syn=False)
             if key == KeyCode.KEY_2:
-                combos.append(uinput.KEY_2)
+                self.device.emit_click(uinput.KEY_2, syn=False)
             if key == KeyCode.KEY_3:
-                combos.append(uinput.KEY_3)
+                self.device.emit_click(uinput.KEY_3, syn=False)
             if key == KeyCode.KEY_4:
-                combos.append(uinput.KEY_4)
+                self.device.emit_click(uinput.KEY_4, syn=False)
             if key == KeyCode.KEY_5:
-                combos.append(uinput.KEY_5)
+                self.device.emit_click(uinput.KEY_5, syn=False)
             if key == KeyCode.KEY_6:
-                combos.append(uinput.KEY_6)
+                self.device.emit_click(uinput.KEY_6, syn=False)
             if key == KeyCode.KEY_7:
-                combos.append(uinput.KEY_7)
+                self.device.emit_click(uinput.KEY_7, syn=False)
             if key == KeyCode.KEY_Q:
-                combos.append(uinput.KEY_Q)
+                self.device.emit_click(uinput.KEY_Q, syn=False)
             if key == KeyCode.KEY_W:
-                combos.append(uinput.KEY_W)
+                self.device.emit_click(uinput.KEY_W, syn=False)
             if key == KeyCode.KEY_E:
-                combos.append(uinput.KEY_E)
+                self.device.emit_click(uinput.KEY_E, syn=False)
             if key == KeyCode.KEY_R:
-                combos.append(uinput.KEY_R)
+                self.device.emit_click(uinput.KEY_R, syn=False)
             if key == KeyCode.KEY_T:
-                combos.append(uinput.KEY_T)
+                self.device.emit_click(uinput.KEY_T, syn=False)
             if key == KeyCode.KEY_X:
-                combos.append(uinput.KEY_X)
+                self.device.emit_click(uinput.KEY_X, syn=False)
             if key == KeyCode.KEY_ALT:
-                combos.append(uinput.KEY_LEFTALT)
+                self.device.emit_click(uinput.KEY_LEFTALT, syn=False)
             if key == KeyCode.KEY_CTRL:
-                combos.append(uinput.KEY_LEFTCTRL)
+                self.device.emit_click(uinput.KEY_LEFTCTRL, syn=False)
             if key == KeyCode.KEY_ESC:
-                combos.append(uinput.KEY_ESC)
-        self.device.emit_combo(combos)
+                self.device.emit_click(uinput.KEY_ESC, syn=False)
+        self.device.syn()
 
     def press(self, key, release=False):
         if key == KeyCode.KEY_ALT:
