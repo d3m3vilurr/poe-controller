@@ -265,13 +265,17 @@ class Controller(object):
 
     def process_events(self):
         """Process available events."""
-        try:
-            events = self.gamepad.read()
-        except EOFError:
-            events = []
+        events = []
+        while True:
+            try:
+                new_events = self.gamepad.read()
+            except EOFError:
+                pass
+            events += new_events
+            if any((ev.ev_type == 'Sync' for ev in new_events)):
+                break
 
-        if len(events) == 1 and events[0].ev_type in ('Sync', 'Misc'):
-            return
+        #print(tuple(ev.ev_type for ev in events))
 
         btn_state = {}
         abs_state = {}
@@ -279,10 +283,12 @@ class Controller(object):
         for key, value in self.abbrevs.items():
             if key.startswith('Absolute'):
                 self.old_abs_state[value] = abs_state[value] = self.abs_state.get(value, 0)
-            if key.startswith('Key'):
+            elif key.startswith('Key'):
                 self.old_btn_state[value] = btn_state[value] = self.btn_state.get(value, 0)
 
         for event in events:
+            if event.ev_type == 'Sync':
+                continue
             if event.ev_type == 'Misc':
                 continue
             key = event.ev_type + '-' + event.code
@@ -294,7 +300,7 @@ class Controller(object):
                     continue
             if event.ev_type == 'Key':
                 btn_state[abbv] = event.state
-            if event.ev_type == 'Absolute':
+            elif event.ev_type == 'Absolute':
                 abs_state[abbv] = event.state
 
                 if abbv == 'HX':
@@ -303,15 +309,15 @@ class Controller(object):
                         btn_state['DL'] = 1
                     elif event.state > 0:
                         btn_state['DR'] = 1
-                if abbv == 'HY':
+                elif abbv == 'HY':
                     btn_state['DU'] = btn_state['DD'] = 0
                     if event.state < 0:
                         btn_state['DU'] = 1
                     elif event.state > 0:
                         btn_state['DD'] = 1
-                if abbv in ('LX', 'RX'):
+                elif abbv in ('LX', 'RX'):
                     abs_state[abbv] = int(abs_state[abbv] / ABS_DIV[0]) + ABS_OFF
-                if abbv in ('LY', 'RY'):
+                elif abbv in ('LY', 'RY'):
                     abs_state[abbv] = int(abs_state[abbv] / ABS_DIV[1]) + ABS_OFF
         btn_state['TL2'] = abs_state['LZ'] == 255 and 1 or 0
         btn_state['TR2'] = abs_state['RZ'] == 255 and 1 or 0
