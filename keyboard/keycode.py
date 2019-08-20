@@ -14,7 +14,9 @@ class KeyCode(enum.Enum):
     KEY_R = 13
     KEY_T = 14
     KEY_X = 15
+    KEY_I = 16
     KEY_ALT = 30
     KEY_CTRL = 31
     KEY_ESC = 32
+    KEY_TAB = 33
 

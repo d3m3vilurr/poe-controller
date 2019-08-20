@@ -254,8 +254,15 @@ class Controller(object):
         if self.pressed('ST') and not self.holded('ST'):
             keys.append(KeyCode.KEY_ESC)
 
+        if self.pressed('SL') and not self.holded('SL'):
+            keys.append(KeyCode.KEY_I)
+
+        if self.pressed('THL') and not self.holded('THL'):
+            keys.append(KeyCode.KEY_TAB)
+
         if self.pressed('THR') and not self.holded('THR'):
             keys.append(KeyCode.KEY_X)
+
 
         difference = 0
 

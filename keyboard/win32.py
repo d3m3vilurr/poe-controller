@@ -55,12 +55,16 @@ class Win32Keyboard(BaseKeyboard):
                 combos.append(ord('T'))
             if key == KeyCode.KEY_X:
                 combos.append(ord('X'))
+            if key == KeyCode.KEY_I:
+                combos.append(ord('I'))
             if key == KeyCode.KEY_ALT:
                 combos.append(win32con.VK_MENU)
             if key == KeyCode.KEY_CTRL:
                 combos.append(win32con.VK_CONTROL)
             if key == KeyCode.KEY_ESC:
                 combos.append(win32con.VK_ESCAPE)
+            if key == KeyCode.KEY_TAB:
+                combos.append(win32con.VK_TAB)
         thread = threading.Thread(target=send_key, args=(combos,))
         thread.start()
 
