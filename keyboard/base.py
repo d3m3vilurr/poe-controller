@@ -1,6 +1,9 @@
 class BaseKeyboard(object):
-    def input(self, keys):
+    def clicks(self, keys):
         pass
 
-    def press(self, key, release=False):
+    def presses(self, keys):
+        pass
+
+    def releases(self, keys):
         pass

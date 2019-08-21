@@ -108,6 +108,7 @@ class Controller(object):
         self.mouse = mouse
         self.keyboard = keyboard
         self.mouse_mode = 0
+        self.key_pressed = set()
 
     def _get_gamepad(self):
         """Get a gamepad object."""
@@ -208,67 +209,71 @@ class Controller(object):
         return self.btn_state.get(abbv, 0) == self.old_btn_state.get(abbv, 0)
 
     def handle_inputs(self):
-        keys = []
+        presses = set()
+        clicks = set()
         if not self.pressed('TR2'):
             # DPAD should check button holding
             if self.pressed('DL') and not self.holded('DL'):
-                keys.append(KeyCode.KEY_1)
+                clicks.add(KeyCode.KEY_1)
             if self.pressed('DU') and not self.holded('DU'):
-                keys.append(KeyCode.KEY_2)
+                clicks.add(KeyCode.KEY_2)
             if self.pressed('DR') and not self.holded('DR'):
-                keys.append(KeyCode.KEY_3)
+                clicks.add(KeyCode.KEY_3)
             if self.pressed('DD') and not self.holded('DD'):
-                keys.append(KeyCode.KEY_4)
+                clicks.add(KeyCode.KEY_4)
             # Normal button can support firing when holding the button
             if self.pressed('W'):
-                keys.append(KeyCode.KEY_Q)
+                presses.add(KeyCode.KEY_Q)
             if self.pressed('N'):
-                keys.append(KeyCode.KEY_W)
+                presses.add(KeyCode.KEY_W)
             if self.pressed('E'):
-                keys.append(KeyCode.KEY_E)
+                presses.add(KeyCode.KEY_E)
         else:
             # DPAD should check button holding
             if self.pressed('DL') and not self.holded('DL'):
-                keys.append(KeyCode.KEY_5)
+                clicks.add(KeyCode.KEY_5)
             if self.pressed('DU') and not self.holded('DU'):
-                keys.append(KeyCode.KEY_6)
+                clicks.add(KeyCode.KEY_6)
             if self.pressed('DR') and not self.holded('DR'):
-                keys.append(KeyCode.KEY_7)
+                clicks.add(KeyCode.KEY_7)
             #if self.pressed('DD') and not self.holded('DD'):
-            #    keys.append(KeyCode.KEY_8)
+            #    clicks.add(KeyCode.KEY_8)
             # Normal button can support firing when holding the button
 
             # XXX: alt should call press/release manually
             if self.pressed('W'):
                 pass
             if self.pressed('N'):
-                keys.append(KeyCode.KEY_R)
+                presses.add(KeyCode.KEY_R)
             if self.pressed('E'):
-                keys.append(KeyCode.KEY_T)
+                presses.add(KeyCode.KEY_T)
             if self.pressed('TL2'):
-                self.keyboard.press(KeyCode.KEY_ALT)
-            else:
-                self.keyboard.press(KeyCode.KEY_ALT, release=True)
+                presses.add(KeyCode.KEY_ALT)
 
         # when press escape key, controller must release button before call it
         if self.pressed('ST') and not self.holded('ST'):
-            keys.append(KeyCode.KEY_ESC)
+            clicks.add(KeyCode.KEY_ESC)
 
         if self.pressed('SL') and not self.holded('SL'):
-            keys.append(KeyCode.KEY_I)
+            clicks.add(KeyCode.KEY_I)
 
         if self.pressed('THL') and not self.holded('THL'):
-            keys.append(KeyCode.KEY_TAB)
+            clicks.add(KeyCode.KEY_TAB)
 
         if self.pressed('THR') and not self.holded('THR'):
-            keys.append(KeyCode.KEY_X)
+            clicks.add(KeyCode.KEY_X)
 
 
         difference = 0
 
         self.handle_mouse()
-        #print(keys)
-        self.keyboard.input(keys)
+        releases = self.key_pressed - presses
+        new_presses = presses - self.key_pressed
+        self.keyboard.releases(releases)
+        self.keyboard.presses(new_presses)
+        self.key_pressed = presses
+        self.keyboard.clicks(clicks)
+        #self.keyboard.input(keys)
 
     def process_events(self):
         """Process available events."""

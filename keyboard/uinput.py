@@ -25,52 +25,70 @@ class UinputKeyboard(BaseKeyboard):
             uinput.KEY_TAB,
         ])
 
-    def input(self, keys):
+    def _key2code(self, key):
+        if key == KeyCode.KEY_1:
+            return uinput.KEY_1
+        if key == KeyCode.KEY_2:
+            return uinput.KEY_2
+        if key == KeyCode.KEY_3:
+            return uinput.KEY_3
+        if key == KeyCode.KEY_4:
+            return uinput.KEY_4
+        if key == KeyCode.KEY_5:
+            return uinput.KEY_5
+        if key == KeyCode.KEY_6:
+            return uinput.KEY_6
+        if key == KeyCode.KEY_7:
+            return uinput.KEY_7
+        if key == KeyCode.KEY_Q:
+            return uinput.KEY_Q
+        if key == KeyCode.KEY_W:
+            return uinput.KEY_W
+        if key == KeyCode.KEY_E:
+            return uinput.KEY_E
+        if key == KeyCode.KEY_R:
+            return uinput.KEY_R
+        if key == KeyCode.KEY_T:
+            return uinput.KEY_T
+        if key == KeyCode.KEY_X:
+            return uinput.KEY_X
+        if key == KeyCode.KEY_I:
+            return uinput.KEY_I
+        if key == KeyCode.KEY_ALT:
+            return uinput.KEY_LEFTALT
+        if key == KeyCode.KEY_CTRL:
+            return uinput.KEY_LEFTCTRL
+        if key == KeyCode.KEY_ESC:
+            return uinput.KEY_ESC
+        if key == KeyCode.KEY_TAB:
+            return uinput.KEY_TAB
+
+    def clicks(self, keys):
         if not len(keys):
             return
-        combos = []
         for key in keys:
-            if key == KeyCode.KEY_1:
-                self.device.emit_click(uinput.KEY_1, syn=False)
-            if key == KeyCode.KEY_2:
-                self.device.emit_click(uinput.KEY_2, syn=False)
-            if key == KeyCode.KEY_3:
-                self.device.emit_click(uinput.KEY_3, syn=False)
-            if key == KeyCode.KEY_4:
-                self.device.emit_click(uinput.KEY_4, syn=False)
-            if key == KeyCode.KEY_5:
-                self.device.emit_click(uinput.KEY_5, syn=False)
-            if key == KeyCode.KEY_6:
-                self.device.emit_click(uinput.KEY_6, syn=False)
-            if key == KeyCode.KEY_7:
-                self.device.emit_click(uinput.KEY_7, syn=False)
-            if key == KeyCode.KEY_Q:
-                self.device.emit_click(uinput.KEY_Q, syn=False)
-            if key == KeyCode.KEY_W:
-                self.device.emit_click(uinput.KEY_W, syn=False)
-            if key == KeyCode.KEY_E:
-                self.device.emit_click(uinput.KEY_E, syn=False)
-            if key == KeyCode.KEY_R:
-                self.device.emit_click(uinput.KEY_R, syn=False)
-            if key == KeyCode.KEY_T:
-                self.device.emit_click(uinput.KEY_T, syn=False)
-            if key == KeyCode.KEY_X:
-                self.device.emit_click(uinput.KEY_X, syn=False)
-            if key == KeyCode.KEY_I:
-                self.device.emit_click(uinput.KEY_I, syn=False)
-            if key == KeyCode.KEY_ALT:
-                self.device.emit_click(uinput.KEY_LEFTALT, syn=False)
-            if key == KeyCode.KEY_CTRL:
-                self.device.emit_click(uinput.KEY_LEFTCTRL, syn=False)
-            if key == KeyCode.KEY_ESC:
-                self.device.emit_click(uinput.KEY_ESC, syn=False)
-            if key == KeyCode.KEY_TAB:
-                self.device.emit_click(uinput.KEY_TAB, syn=False)
+            code = self._key2code(key)
+            if not code:
+                continue
+            self.device.emit_click(code, syn=False)
         self.device.syn()
 
-    def press(self, key, release=False):
-        if key == KeyCode.KEY_ALT:
-            inp = uinput.KEY_LEFTALT
-        else:
+    def presses(self, keys):
+        if not len(keys):
             return
-        self.device.emit(inp, 0 if release else 1)
+        for key in keys:
+            code = self._key2code(key)
+            if not code:
+                continue
+            self.device.emit(code, 1, syn=False)
+        self.device.syn()
+
+    def releases(self, keys):
+        if not len(keys):
+            return
+        for key in keys:
+            code = self._key2code(key)
+            if not code:
+                continue
+            self.device.emit(code, 0, syn=False)
+        self.device.syn()
