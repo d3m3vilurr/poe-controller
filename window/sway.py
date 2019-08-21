@@ -28,7 +28,7 @@ class SwayWindow(BaseWindow):
         try:
             self._curr_win = self.i3.get_tree().find_focused()
             rect = self._curr_win.rect
-            self._curr_win_rect = (rect.x / 2, rect.y / 2, rect.width / 2, rect.height / 2)
+            self._curr_win_rect = (rect.x, rect.y, rect.width, rect.height)
             return self._curr_win.name == 'Path of Exile'
         except:
             return False
