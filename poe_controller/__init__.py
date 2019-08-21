@@ -1,8 +1,8 @@
 import sys
 import inputs
-from mouse import DefaultMouse
-from keyboard import KeyCode, DefaultKeyboard
-from window import DefaultWindow
+from .mouse import DefaultMouse
+from .keyboard import KeyCode, DefaultKeyboard
+from .window import DefaultWindow
 import math
 import enum
 import time

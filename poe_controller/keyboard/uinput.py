@@ -1,6 +1,6 @@
 import uinput
-from keyboard.keycode import KeyCode
-from keyboard.base import BaseKeyboard
+from .keycode import KeyCode
+from .base import BaseKeyboard
 
 class UinputKeyboard(BaseKeyboard):
     def __init__(self):

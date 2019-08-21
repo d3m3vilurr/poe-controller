@@ -1,5 +1,5 @@
 import uinput
-from mouse.base import BaseMouse
+from .base import BaseMouse
 import time
 
 TIMEOUT = 0.03

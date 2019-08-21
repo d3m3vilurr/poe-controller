@@ -1,9 +1,8 @@
-import i3ipc
-from window.base import BaseWindow
+import win32gui
+from .base import BaseWindow
 
-class SwayWindow(BaseWindow):
+class Win32Window(BaseWindow):
     def __init__(self):
-        self.i3 = i3ipc.Connection()
         self._curr_win_rect = (0, 0, 0, 0)
 
     def get_window_size(self):
@@ -26,9 +25,8 @@ class SwayWindow(BaseWindow):
 
     def is_active(self):
         try:
-            self._curr_win = self.i3.get_tree().find_focused()
-            rect = self._curr_win.rect
-            self._curr_win_rect = (rect.x, rect.y, rect.width, rect.height)
-            return self._curr_win.name == 'Path of Exile'
+            self._curr_win = win32gui.GetForegroundWindow()
+            self._curr_win_rect = win32gui.GetWindowRect(self._curr_win)
+            return win32gui.GetWindowText(self._curr_win) == 'Path of Exile'
         except:
             return False

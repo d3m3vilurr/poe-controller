@@ -1,7 +1,7 @@
 import win32api
 import win32con
 import enum
-from mouse.base import BaseMouse
+from .base import BaseMouse
 
 
 class Win32MouseButton(enum.Enum):

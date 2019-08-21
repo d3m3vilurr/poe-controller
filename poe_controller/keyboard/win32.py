@@ -2,8 +2,8 @@ import win32api
 import win32con
 import time
 import threading
-from keyboard.keycode import KeyCode
-from keyboard.base import BaseKeyboard
+from .keycode import KeyCode
+from .base import BaseKeyboard
 
 _sended = dict()
 _timeout = 0.5

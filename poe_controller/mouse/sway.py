@@ -1,7 +1,7 @@
 import enum
 import i3ipc
 import uinput
-from mouse.uinput import UinputMouse
+from .uinput import UinputMouse
 
 
 class SwayMouse(UinputMouse):
