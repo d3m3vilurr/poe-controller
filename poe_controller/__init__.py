@@ -181,7 +181,6 @@ class Controller(object):
 
             point_diff = move_distance(angle(mouse_move_rel[0], mouse_move_rel[1]), distance=distance)
             self.mouse.move(point_diff[0], point_diff[1], relative=True)
-            self.mouse.left(on=self.pressed('S'))
         else:
             distance = (mouse_move_abs[0] ** 2 + mouse_move_abs[1] ** 2) ** 0.5
             # left / right should move to twice than up / down
@@ -199,9 +198,6 @@ class Controller(object):
             if abs(mouse_move_abs[0]) < MOVE_THRESHOLD and abs(mouse_move_abs[1]) < MOVE_THRESHOLD:
                 self.mouse.left(on=False)
 
-            self.mouse.right(on=self.pressed('TR'))
-            self.mouse.middle(on=self.pressed('TL'))
-
     def pressed(self, abbv):
         return self.btn_state.get(abbv, 0) != 0
 
@@ -211,44 +207,61 @@ class Controller(object):
     def handle_inputs(self):
         presses = set()
         clicks = set()
-        if not self.pressed('TR2'):
-            # DPAD should check button holding
-            if self.pressed('DL') and not self.holded('DL'):
-                clicks.add(KeyCode.KEY_1)
-            if self.pressed('DU') and not self.holded('DU'):
-                clicks.add(KeyCode.KEY_2)
-            if self.pressed('DR') and not self.holded('DR'):
-                clicks.add(KeyCode.KEY_3)
-            if self.pressed('DD') and not self.holded('DD'):
-                clicks.add(KeyCode.KEY_4)
-            # Normal button can support firing when holding the button
+        # Flasks (L1, Left, Up, Right, R1)
+        if self.pressed('TL') and not self.holded('TL'):
+            clicks.add(KeyCode.KEY_1)
+        if self.pressed('DL') and not self.holded('DL'):
+            clicks.add(KeyCode.KEY_2)
+        if self.pressed('DU') and not self.holded('DU'):
+            clicks.add(KeyCode.KEY_3)
+        if self.pressed('DR') and not self.holded('DR'):
+            clicks.add(KeyCode.KEY_4)
+        if self.pressed('TR') and not self.holded('DR'):
+            clicks.add(KeyCode.KEY_5)
+
+        if self.pressed('TR2'):
+            # Toggle loot filter (R2 + L3)
+            if self.pressed('THL') and not self.holded('THL'):
+                self.pressed(KeyCode.KEY_Z)
+            # Swap weapon (R2 + R3)
+            if self.pressed('THR') and not self.holded('THR'):
+                clicks.add(KeyCode.KEY_X)
+            # Show dropped items (R2 + Down)
+            if self.pressed('DD'):
+                self.pressed(KeyCode.KEY_ALT)
+
+        # when holding TR2 use second skill set
+        if self.pressed('TR2'):
             if self.pressed('W'):
                 presses.add(KeyCode.KEY_Q)
-            if self.pressed('N'):
-                presses.add(KeyCode.KEY_W)
-            if self.pressed('E'):
-                presses.add(KeyCode.KEY_E)
+            self.mouse.left(on=self.pressed('N'))
+            self.mouse.middle(on=self.pressed('E'))
+            self.mouse.right(on=self.pressed('S'))
         else:
-            # DPAD should check button holding
-            if self.pressed('DL') and not self.holded('DL'):
-                clicks.add(KeyCode.KEY_5)
-            if self.pressed('DU') and not self.holded('DU'):
-                clicks.add(KeyCode.KEY_6)
-            if self.pressed('DR') and not self.holded('DR'):
-                clicks.add(KeyCode.KEY_7)
-            #if self.pressed('DD') and not self.holded('DD'):
-            #    clicks.add(KeyCode.KEY_8)
-            # Normal button can support firing when holding the button
-
-            # XXX: alt should call press/release manually
             if self.pressed('W'):
-                pass
+                presses.add(KeyCode.KEY_W)
             if self.pressed('N'):
-                presses.add(KeyCode.KEY_R)
+                presses.add(KeyCode.KEY_E)
             if self.pressed('E'):
+                presses.add(KeyCode.KEY_R)
+            if self.pressed('S'):
                 presses.add(KeyCode.KEY_T)
-            if self.pressed('TL2'):
-                presses.add(KeyCode.KEY_ALT)
+
+        if self.pressed('TL2'):
+            # Hold current position if doesn't use moving without attack (L2)
+            self.pressed(KeyCode.KEY_SHIFT)
+
+            if self.pressed('THL') and not self.holded('THL'):
+                pass
+            if self.pressed('THR') and not self.holded('THR'):
+                pass
+            if self.pressed('DD') and not self.holded('DD'):
+                pass
+
+        if not self.pressed('TL2') and not self.pressed('TR2'):
+            # Toggle mini map (Down)
+            if self.pressed('DD') and not self.holded('DD'):
+                self.pressed(KeyCode.KEY_TAB)
 
         # when press escape key, controller must release button before call it
         if self.pressed('ST') and not self.holded('ST'):
@@ -256,12 +269,6 @@ class Controller(object):
 
         if self.pressed('SL') and not self.holded('SL'):
             clicks.add(KeyCode.KEY_I)
-
-        if self.pressed('THL') and not self.holded('THL'):
-            clicks.add(KeyCode.KEY_TAB)
-
-        if self.pressed('THR') and not self.holded('THR'):
-            clicks.add(KeyCode.KEY_X)
 
 
         difference = 0
@@ -273,7 +280,6 @@ class Controller(object):
         self.keyboard.presses(new_presses)
         self.key_pressed = presses
         self.keyboard.clicks(clicks)
-        #self.keyboard.input(keys)
 
     def process_events(self):
         """Process available events."""

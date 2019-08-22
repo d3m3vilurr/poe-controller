@@ -8,15 +8,17 @@ class KeyCode(enum.Enum):
     KEY_5 = 5
     KEY_6 = 6
     KEY_7 = 7
-    KEY_Q = 10
-    KEY_W = 11
-    KEY_E = 12
+    KEY_E = 10
+    KEY_I = 11
+    KEY_Q = 12
     KEY_R = 13
     KEY_T = 14
-    KEY_X = 15
-    KEY_I = 16
+    KEY_W = 15
+    KEY_X = 16
+    KEY_Z = 17
     KEY_ALT = 30
     KEY_CTRL = 31
-    KEY_ESC = 32
-    KEY_TAB = 33
+    KEY_SHIFT = 32
+    KEY_ESC = 33
+    KEY_TAB = 34
 

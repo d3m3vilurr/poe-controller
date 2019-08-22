@@ -34,24 +34,28 @@ class Win32Keyboard(BaseKeyboard):
             return ord('6')
         if key == KeyCode.KEY_7:
             return ord('7')
-        if key == KeyCode.KEY_Q:
-            return ord('Q')
-        if key == KeyCode.KEY_W:
-            return ord('W')
         if key == KeyCode.KEY_E:
             return ord('E')
+        if key == KeyCode.KEY_I:
+            return ord('I')
+        if key == KeyCode.KEY_Q:
+            return ord('Q')
         if key == KeyCode.KEY_R:
             return ord('R')
         if key == KeyCode.KEY_T:
             return ord('T')
+        if key == KeyCode.KEY_W:
+            return ord('W')
         if key == KeyCode.KEY_X:
             return ord('X')
-        if key == KeyCode.KEY_I:
-            return ord('I')
+        if key == KeyCode.KEY_Z:
+            return ord('Z')
         if key == KeyCode.KEY_ALT:
             return win32con.VK_MENU
         if key == KeyCode.KEY_CTRL:
             return win32con.VK_CONTROL
+        if key == KeyCode.KEY_SHIFT:
+            return win32con.VK_SHIFT
         if key == KeyCode.KEY_ESC:
             return win32con.VK_ESCAPE
         if key == KeyCode.KEY_TAB:
