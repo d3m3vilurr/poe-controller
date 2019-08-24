@@ -2,11 +2,8 @@ class BaseMouse(object):
     def move(self, x, y, relative=False):
         pass
 
-    def left(self, on=True):
+    def presses(self, buttons):
         pass
 
-    def middle(self, on=True):
-        pass
-
-    def right(self, on=True):
+    def releases(self, buttons):
         pass

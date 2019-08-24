@@ -1,5 +1,6 @@
 import uinput
 from .base import BaseMouse
+from .buttoncode import ButtonCode
 import time
 
 TIMEOUT = 0.03
@@ -18,7 +19,6 @@ class UinputMouse(BaseMouse):
             uinput.ABS_Y + (0, 1080, 0, 0),
         ])
         #self._last_move_time = 0
-        self._BTN = {}
 
     def _get_current_input_device(self):
         return self.default_device
@@ -39,17 +39,32 @@ class UinputMouse(BaseMouse):
             self.default_device.emit(uinput.REL_Y, int(y), syn=False)
             self.default_device.syn()
 
-    def left(self, on=True):
-        self._click(uinput.BTN_LEFT, on)
+    def _btn2code(self, btn):
+        if btn == ButtonCode.LEFT:
+            return uinput.BTN_LEFT
+        if btn == ButtonCode.RIGHT:
+            return uinput.BTN_RIGHT
+        if btn == ButtonCode.MIDDLE:
+            return uinput.BTN_MIDDLE
 
-    def middle(self, on=True):
-        self._click(uinput.BTN_MIDDLE, on)
-
-    def right(self, on=True):
-        self._click(uinput.BTN_RIGHT, on)
-
-    def _click(self, btn, on=True):
-        if self._BTN.get(btn, False) == on:
+    def presses(self, buttons):
+        if not len(buttons):
             return
-        self.default_device.emit(btn, on and 1 or 0)
-        self._BTN[btn] = on
+        device = self._get_current_input_device()
+        for btn in buttons:
+            code = self._btn2code(btn)
+            if not code:
+                continue
+            device.emit(code, 1, syn=False)
+        device.syn()
+
+    def releases(self, buttons):
+        if not len(buttons):
+            return
+        device = self._get_current_input_device()
+        for btn in buttons:
+            code = self._btn2code(btn)
+            if not code:
+                continue
+            device.emit(code, 0, syn=False)
+        device.syn()

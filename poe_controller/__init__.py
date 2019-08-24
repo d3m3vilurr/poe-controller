@@ -1,6 +1,6 @@
 import sys
 import inputs
-from .mouse import DefaultMouse
+from .mouse import ButtonCode as MouseButtonCode, DefaultMouse
 from .keyboard import KeyCode, DefaultKeyboard
 from .window import DefaultWindow
 import math
@@ -109,6 +109,7 @@ class Controller(object):
         self.keyboard = keyboard
         self.mouse_mode = 0
         self.key_pressed = set()
+        self.mouse_pressed = set()
 
     def _get_gamepad(self):
         """Get a gamepad object."""
@@ -148,6 +149,7 @@ class Controller(object):
         return output_string
 
     def handle_mouse(self):
+        mouse_presses = set()
         mouse_move_abs = [0, 0]
         mouse_move_rel = [0, 0]
 
@@ -163,17 +165,12 @@ class Controller(object):
                 mouse_move_rel[1] = v
 
         if abs(mouse_move_rel[0]) > MOVE_THRESHOLD or abs(mouse_move_rel[1]) > MOVE_THRESHOLD:
-            if self.mouse_mode != 0:
-                # forceful release all buttons
-                self.mouse.left(on=False)
-                self.mouse.right(on=False)
-                self.mouse.middle(on=False)
             self.mouse_mode = 1
         elif abs(mouse_move_abs[0]) > MOVE_THRESHOLD or abs(mouse_move_abs[1]) > MOVE_THRESHOLD:
             if self.mouse_mode != 0:
                 self.mouse_mode = 0
             # forceful activate left mouse
-            self.mouse.left()
+            mouse_presses.add(MouseButtonCode.LEFT)
 
         if self.mouse_mode == 1:
             distance = (mouse_move_rel[0] ** 2 + mouse_move_rel[1] ** 2) ** 0.5
@@ -194,9 +191,7 @@ class Controller(object):
             cursor_x = int((win_size[0] / 2) + point_diff[0] + win_offset[0])
             cursor_y = int((win_size[1] / 2) + point_diff[1] + win_offset[1])
             self.mouse.move(cursor_x, cursor_y)
-
-            if abs(mouse_move_abs[0]) < MOVE_THRESHOLD and abs(mouse_move_abs[1]) < MOVE_THRESHOLD:
-                self.mouse.left(on=False)
+        return mouse_presses
 
     def pressed(self, abbv):
         return self.btn_state.get(abbv, 0) != 0
@@ -205,47 +200,51 @@ class Controller(object):
         return self.btn_state.get(abbv, 0) == self.old_btn_state.get(abbv, 0)
 
     def handle_inputs(self):
-        presses = set()
-        clicks = set()
+        key_presses = set()
+        key_clicks = set()
+        mouse_presses = set()
         # Flasks (L1, Left, Up, Right, R1)
         if self.pressed('TL') and not self.holded('TL'):
-            clicks.add(KeyCode.KEY_1)
+            key_clicks.add(KeyCode.KEY_1)
         if self.pressed('DL') and not self.holded('DL'):
-            clicks.add(KeyCode.KEY_2)
+            key_clicks.add(KeyCode.KEY_2)
         if self.pressed('DU') and not self.holded('DU'):
-            clicks.add(KeyCode.KEY_3)
+            key_clicks.add(KeyCode.KEY_3)
         if self.pressed('DR') and not self.holded('DR'):
-            clicks.add(KeyCode.KEY_4)
+            key_clicks.add(KeyCode.KEY_4)
         if self.pressed('TR') and not self.holded('DR'):
-            clicks.add(KeyCode.KEY_5)
+            key_clicks.add(KeyCode.KEY_5)
 
         if self.pressed('TR2'):
             # Toggle loot filter (R2 + L3)
             if self.pressed('THL') and not self.holded('THL'):
-                self.pressed(KeyCode.KEY_Z)
+                key_clicks.add(KeyCode.KEY_Z)
             # Swap weapon (R2 + R3)
             if self.pressed('THR') and not self.holded('THR'):
-                clicks.add(KeyCode.KEY_X)
+                key_clicks.add(KeyCode.KEY_X)
             # Show dropped items (R2 + Down)
             if self.pressed('DD'):
-                self.pressed(KeyCode.KEY_ALT)
+                key_presses.add(KeyCode.KEY_ALT)
 
         # when holding TR2 use second skill set
         if self.pressed('TR2'):
             if self.pressed('W'):
-                presses.add(KeyCode.KEY_Q)
-            self.mouse.left(on=self.pressed('N'))
-            self.mouse.middle(on=self.pressed('E'))
-            self.mouse.right(on=self.pressed('S'))
+                key_presses.add(KeyCode.KEY_Q)
+            if self.pressed('N'):
+                mouse_presses.add(MouseButtonCode.LEFT)
+            if self.pressed('E'):
+                mouse_presses.add(MouseButtonCode.MIDDLE)
+            if self.pressed('S'):
+                mouse_presses.add(MouseButtonCode.RIGHT)
         else:
             if self.pressed('W'):
-                presses.add(KeyCode.KEY_W)
+                key_presses.add(KeyCode.KEY_W)
             if self.pressed('N'):
-                presses.add(KeyCode.KEY_E)
+                key_presses.add(KeyCode.KEY_E)
             if self.pressed('E'):
-                presses.add(KeyCode.KEY_R)
+                key_presses.add(KeyCode.KEY_R)
             if self.pressed('S'):
-                presses.add(KeyCode.KEY_T)
+                key_presses.add(KeyCode.KEY_T)
 
         if self.pressed('TL2'):
             # Hold current position if doesn't use moving without attack (L2)
@@ -265,21 +264,24 @@ class Controller(object):
 
         # when press escape key, controller must release button before call it
         if self.pressed('ST') and not self.holded('ST'):
-            clicks.add(KeyCode.KEY_ESC)
+            key_clicks.add(KeyCode.KEY_ESC)
 
         if self.pressed('SL') and not self.holded('SL'):
-            clicks.add(KeyCode.KEY_I)
+            key_clicks.add(KeyCode.KEY_I)
 
 
         difference = 0
 
-        self.handle_mouse()
-        releases = self.key_pressed - presses
-        new_presses = presses - self.key_pressed
-        self.keyboard.releases(releases)
-        self.keyboard.presses(new_presses)
-        self.key_pressed = presses
-        self.keyboard.clicks(clicks)
+        mouse_presses |= self.handle_mouse()
+        self.mouse.releases(self.mouse_pressed - mouse_presses)
+        self.mouse.presses(mouse_presses - self.mouse_pressed)
+        self.mouse_pressed = mouse_presses
+        self.keyboard.clicks(key_clicks)
+        self.keyboard.releases(self.key_pressed - key_presses)
+        self.keyboard.presses(key_presses - self.key_pressed)
+        self.key_pressed = key_presses
+        self.keyboard.clicks(key_clicks)
+
 
     def process_events(self):
         """Process available events."""
