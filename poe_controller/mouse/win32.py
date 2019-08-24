@@ -2,18 +2,10 @@ import win32api
 import win32con
 import enum
 from .base import BaseMouse
-
-
-class Win32MouseButton(enum.Enum):
-    LEFT=1
-    RIGHT=2
-    MIDDLE=3
+from .buttoncode import ButtonCode
 
 
 class Win32Mouse(BaseMouse):
-    def __init__(self):
-        self._BTN = {}
-
     def move(self, x, y, relative=False):
         if not relative:
             win32api.SetCursorPos((x, y))
@@ -21,46 +13,36 @@ class Win32Mouse(BaseMouse):
             _x, _y = win32api.GetCursorPos()
             win32api.SetCursorPos((_x + x, _y + y))
 
-    def left(self, on=True):
+    def _btn2eventcode(self, btn, on):
         if on:
-            self._press(Win32MouseButton.LEFT)
+            if btn == ButtonCode.LEFT:
+                return win32con.MOUSEEVENTF_LEFTDOWN
+            if btn == ButtonCode.RIGHT:
+                return win32con.MOUSEEVENTF_RIGHTDOWN
+            if btn == ButtonCode.MIDDLE:
+                return win32con.MOUSEEVENTF_MIDDLEDOWN
         else:
-            self._release(Win32MouseButton.LEFT)
+            if btn == ButtonCode.LEFT:
+                return win32con.MOUSEEVENTF_LEFTUP
+            if btn == ButtonCode.RIGHT:
+                return win32con.MOUSEEVENTF_RIGHTUP
+            if btn == ButtonCode.MIDDLE:
+                return win32con.MOUSEEVENTF_MIDDLEUP
 
-    def middle(self, on=True):
-        if on:
-            self._press(Win32MouseButton.MIDDLE)
-        else:
-            self._release(Win32MouseButton.MIDDLE)
-
-    def right(self, on=True):
-        if on:
-            self._press(Win32MouseButton.RIGHT)
-        else:
-            self._release(Win32MouseButton.RIGHT)
-
-    def _press(self, btn):
-        if self._BTN.get(btn, False):
+    def presses(self, buttons):
+        if not len(buttons):
             return
-        if btn == Win32MouseButton.LEFT:
-            event = win32con.MOUSEEVENTF_LEFTDOWN
-        elif btn == Win32MouseButton.RIGHT:
-            event = win32con.MOUSEEVENTF_RIGHTDOWN
-        elif btn == Win32MouseButton.MIDDLE:
-            event = win32con.MOUSEEVENTF_MIDDLEDOWN
-        win32api.mouse_event(event, 0, 0, 0, 0)
-        self._BTN[btn] = True
+        for btn in buttons:
+            code = self._btn2eventcode(btn, True)
+            if not code:
+                continue
+            win32api.mouse_event(code, 0, 0, 0, 0)
 
-    def _release(self, btn):
-        if not self._BTN.get(btn, False):
+    def releases(self, buttons):
+        if not len(buttons):
             return
-        if btn == Win32MouseButton.LEFT:
-            event = win32con.MOUSEEVENTF_LEFTUP
-        elif btn == Win32MouseButton.RIGHT:
-            event = win32con.MOUSEEVENTF_RIGHTUP
-        elif btn == Win32MouseButton.MIDDLE:
-            event = win32con.MOUSEEVENTF_MIDDLEUP
-        win32api.mouse_event(event, 0, 0, 0, 0)
-        self._BTN[btn] = False
-
-
+        for btn in buttons:
+            code = self._btn2eventcode(btn, False)
+            if not code:
+                continue
+            win32api.mouse_event(code, 0, 0, 0, 0)
