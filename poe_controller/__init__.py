@@ -212,7 +212,7 @@ class Controller(object):
             key_clicks.add(KeyCode.KEY_3)
         if self.pressed('DR') and not self.holded('DR'):
             key_clicks.add(KeyCode.KEY_4)
-        if self.pressed('TR') and not self.holded('DR'):
+        if self.pressed('TR') and not self.holded('TR'):
             key_clicks.add(KeyCode.KEY_5)
 
         if self.pressed('TR2'):
@@ -280,7 +280,6 @@ class Controller(object):
         self.keyboard.releases(self.key_pressed - key_presses)
         self.keyboard.presses(key_presses - self.key_pressed)
         self.key_pressed = key_presses
-        self.keyboard.clicks(key_clicks)
 
 
     def process_events(self):
