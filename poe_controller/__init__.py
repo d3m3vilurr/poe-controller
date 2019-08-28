@@ -6,7 +6,6 @@ from .window import DefaultWindow
 import math
 import enum
 import time
-import traceback
 
 DISTANCE = 50
 MOVE_THRESHOLD = 20
@@ -348,23 +347,3 @@ class Controller(object):
 
         if self.window.is_active():
             self.handle_inputs()
-
-
-def main():
-    """Process all events forever."""
-    while 1:
-        try:
-            controller = Controller()
-            while 1:
-                controller.process_events()
-        except inputs.UnpluggedError:
-            pass
-        except KeyboardInterrupt:
-            sys.exit(0)
-        except:
-            traceback.print_exc()
-        time.sleep(0.1)
-
-
-if __name__ == "__main__":
-    main()

@@ -25,7 +25,7 @@ setup(name='poe-controller',
       packages=find_packages(),
       include_package_data=True,
       entry_points=dict(
-          console_scripts=['poe-controller=poe_controller:main'],
+          console_scripts=['poe-controller=poe_controller:__main__'],
       ),
       install_requires=requires,
       dependency_links=[
