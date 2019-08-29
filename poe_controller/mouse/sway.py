@@ -20,11 +20,11 @@ class SwayMouse(UinputMouse):
             curr = output
         if not curr:
             return self.default_device
-        dev = self.point_devices.get(curr.name)
-        if dev:
-            return dev
 
-        self.point_devices[curr.name] = uinput.Device([
+        if hasattr(self._shared_data, curr.name):
+            return curr.name
+
+        setattr(self._shared_data, curr.name, [
             uinput.BTN_LEFT,
             uinput.BTN_RIGHT,
             uinput.BTN_MIDDLE,
@@ -33,4 +33,5 @@ class SwayMouse(UinputMouse):
             uinput.ABS_X + (0, curr.rect.width, 0, 0),
             uinput.ABS_Y + (0, curr.rect.height, 0, 0),
         ])
-        return self.point_devices[curr.name]
+
+        return curr.name
